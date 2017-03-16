@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/layout_widget"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/colorWidget"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/time_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="тут часы будут"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text=""
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:visibility="visible"/>
+
+    <ListView
+        android:id="@+id/listViewWidget"
+        android:layout_width="wrap_content"
+        android:layout_height="243dp"/>
+
+</LinearLayout>
