@@ -23,13 +23,18 @@ import java.util.List;
 public class NoteList extends AppCompatActivity {
 
     private static final String TAG = "DEBUGGG";
+    public static final String NOTE_NAME_ADD = "NoteNameAdd";
+    public static final String NOTE_TEXT_ADD = "NoteTextAdd";
+    public static final String NOTE_NAME_EDITED = "NoteNameEdited";
+    public static final String NOTE_TEXT_EDITED = "NoteTextEdited";
+    public static final String NOTE_POSITION = "NotePosition";
+    private static final int REQUEST_CODE_NOTE_ADD = 1;
+    private static final int REQUEST_CODE_NOTE_EDIT = 2;
 
     private ListView lv_notes;
     private ArrayAdapter<String> mStringArrayAdapter;
     private List<String> elements = new ArrayList<>();
     private Intent mIntent;
-    private static final int REQUEST_CODE_NOTE_ADD = 1;
-    private static final int REQUEST_CODE_NOTE_EDIT = 2;
     private String noteName;
     private String noteText;
     private int notePosition;
@@ -137,8 +142,8 @@ public class NoteList extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_CODE_NOTE_ADD: {
-                    noteName = data.getStringExtra("NoteNameAdd");
-                    noteText = data.getStringExtra("NoteTextAdd");
+                    noteName = data.getStringExtra(NOTE_NAME_ADD);
+                    noteText = data.getStringExtra(NOTE_TEXT_ADD);
                     if (!noteName.isEmpty()) {
                         addElement(noteName, noteText);
                     }
@@ -146,9 +151,9 @@ public class NoteList extends AppCompatActivity {
                 }
 
                 case REQUEST_CODE_NOTE_EDIT: {
-                    noteName = data.getStringExtra("NoteNameEdited");
-                    noteText = data.getStringExtra("NoteTextEdited");
-                    notePosition = data.getIntExtra("NotePosition", -10);
+                    noteName = data.getStringExtra(NOTE_NAME_EDITED);
+                    noteText = data.getStringExtra(NOTE_TEXT_EDITED);
+                    notePosition = data.getIntExtra(NOTE_POSITION, -10);
                     if (!noteName.isEmpty() && notePosition != -10) {
                         editElement(notePosition, noteName, noteText);
                     }

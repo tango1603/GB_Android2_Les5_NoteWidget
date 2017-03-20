@@ -43,7 +43,7 @@ public class Note extends AppCompatActivity {
         noteName.setFocusable(true);
         noteName.setCursorVisible(true);
         mIntent = getIntent();
-        position = mIntent.getIntExtra("NodePosition", -10);
+        position = mIntent.getIntExtra(NoteList.NOTE_POSITION, -10);
         findEditNode(position);
     }
 
@@ -68,8 +68,8 @@ public class Note extends AppCompatActivity {
                 if (position == -10) {
                     if (noteName.getText().toString() != "") {
                         Log.d(TAG, "onOptionsItemSelected position: " + position);
-                        intent.putExtra("NoteNameAdd", noteName.getText().toString());
-                        intent.putExtra("NoteTextAdd", noteText.getText().toString());
+                        intent.putExtra(NoteList.NOTE_NAME_ADD, noteName.getText().toString());
+                        intent.putExtra(NoteList.NOTE_TEXT_ADD, noteText.getText().toString());
                         setResult(RESULT_OK, intent);
                     } else {
                         Log.d(TAG, "RESULT_CANCELED" + position);
@@ -78,9 +78,9 @@ public class Note extends AppCompatActivity {
                 } else {
                     if (noteName.getText().toString() != "") {
                         Log.d(TAG, "onOptionsItemSelected position: " + position);
-                        intent.putExtra("NoteNameEdited", noteName.getText().toString());
-                        intent.putExtra("NoteTextEdited", noteText.getText().toString());
-                        intent.putExtra("NotePosition", position);
+                        intent.putExtra(NoteList.NOTE_NAME_EDITED, noteName.getText().toString());
+                        intent.putExtra(NoteList.NOTE_TEXT_EDITED, noteText.getText().toString());
+                        intent.putExtra(NoteList.NOTE_POSITION, position);
                         setResult(RESULT_OK, intent);
                     } else {
                         Log.d(TAG, "RESULT_CANCELED" + position);
