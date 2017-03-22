@@ -9,6 +9,7 @@ import com.raizlabs.android.dbflow.structure.BaseModel;
  * Created by Ilya on 04.03.2017.
  * База данных приложения
  */
+
 @Table(database = AppDataBase.class)
 public class TblNotes extends BaseModel {
 

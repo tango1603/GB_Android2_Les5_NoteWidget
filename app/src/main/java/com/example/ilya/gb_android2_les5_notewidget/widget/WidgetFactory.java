@@ -11,18 +11,14 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * If you are familiar with Adapter of ListView,this is the same as adapter
- * with few changes
- *
- */
-public class ListProvider implements RemoteViewsFactory {
+
+public class WidgetFactory implements RemoteViewsFactory {
     private ArrayList<ListItem> listItemList = new ArrayList<>();
     private Context context = null;
     private int appWidgetId;
     private List<TblNotes> tblNotesList;
 
-    public ListProvider(Context context, Intent intent) {
+    public WidgetFactory(Context context, Intent intent) {
         this.context = context;
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
@@ -63,6 +59,11 @@ public class ListProvider implements RemoteViewsFactory {
         remoteView.setTextViewText(R.id.heading, listItem.heading);
         remoteView.setTextViewText(R.id.content, listItem.content);
         //// TODO: 15.03.2017 сделать рендомный подмес картинок
+
+        Intent clickIntent = new Intent();
+        clickIntent.putExtra(WidgetProvider.ITEM_POSITION,position);
+        remoteView.setOnClickFillInIntent(R.id.itemWidget,clickIntent);
+
         return remoteView;
     }
 

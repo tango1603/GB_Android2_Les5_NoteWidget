@@ -19,6 +19,4 @@ public class App extends Application {
                         .openDatabasesOnInit(true)
                         .build());
     }
-
-
 }

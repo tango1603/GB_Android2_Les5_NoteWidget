@@ -8,11 +8,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.example.ilya.gb_android2_les5_notewidget.Controller;
 import com.example.ilya.gb_android2_les5_notewidget.R;
 import com.example.ilya.gb_android2_les5_notewidget.models.tables.TblNotes;
-import com.raizlabs.android.dbflow.sql.language.Select;
-
-import java.util.List;
+import com.example.ilya.gb_android2_les5_notewidget.models.tables.TblNotes_Table;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 public class Note extends AppCompatActivity {
 
@@ -23,13 +23,17 @@ public class Note extends AppCompatActivity {
     private String nodeNameStr;
     private String nodeTextStr;
     private int position = -10;
-    private List<TblNotes> tblNotesList;
+    private Controller controller;
+
 
     private void findEditNode(int nodePosition) {
         if (nodePosition != -10) {
-            tblNotesList = new Select().from(TblNotes.class).queryList();
-            nodeNameStr = tblNotesList.get(nodePosition).noteName;
-            nodeTextStr = tblNotesList.get(nodePosition).noteText;
+            TblNotes queryTbl = SQLite.select()
+                    .from(TblNotes.class)
+                    .where(TblNotes_Table.listPosition.eq(nodePosition))
+                    .querySingle();
+            nodeNameStr = queryTbl.getNoteName();
+            nodeTextStr = queryTbl.getNoteText();
         } else return;
     }
 
@@ -44,7 +48,9 @@ public class Note extends AppCompatActivity {
         noteName.setCursorVisible(true);
         mIntent = getIntent();
         position = mIntent.getIntExtra(NoteList.NOTE_POSITION, -10);
+        Log.d(TAG, "onCreate: "+position);
         findEditNode(position);
+        controller= new Controller(this);
     }
 
     @Override
@@ -62,14 +68,14 @@ public class Note extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         Intent intent = new Intent();
         switch (item.getItemId()) {
             case R.id.menu_save: {
                 if (position == -10) {
                     if (noteName.getText().toString() != "") {
-                        Log.d(TAG, "onOptionsItemSelected position: " + position);
-                        intent.putExtra(NoteList.NOTE_NAME_ADD, noteName.getText().toString());
-                        intent.putExtra(NoteList.NOTE_TEXT_ADD, noteText.getText().toString());
+                        Log.d(TAG, "onOptionsItemSelected position add: " + position);
+                        controller.addElement(noteName.getText().toString(), noteText.getText().toString());
                         setResult(RESULT_OK, intent);
                     } else {
                         Log.d(TAG, "RESULT_CANCELED" + position);
@@ -77,11 +83,11 @@ public class Note extends AppCompatActivity {
                     }
                 } else {
                     if (noteName.getText().toString() != "") {
-                        Log.d(TAG, "onOptionsItemSelected position: " + position);
-                        intent.putExtra(NoteList.NOTE_NAME_EDITED, noteName.getText().toString());
-                        intent.putExtra(NoteList.NOTE_TEXT_EDITED, noteText.getText().toString());
-                        intent.putExtra(NoteList.NOTE_POSITION, position);
-                        setResult(RESULT_OK, intent);
+                        Log.d(TAG, "onOptionsItemSelected position edited: " + position);
+                        if (!noteName.getText().toString().isEmpty() && position != -10) {
+                            controller.editElement(position,noteName.getText().toString(),noteText.getText().toString());
+                        setResult(RESULT_OK, intent);}
+
                     } else {
                         Log.d(TAG, "RESULT_CANCELED" + position);
                         setResult(RESULT_CANCELED, intent);
@@ -94,4 +100,9 @@ public class Note extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-}
+
+
+
+
+    }
+

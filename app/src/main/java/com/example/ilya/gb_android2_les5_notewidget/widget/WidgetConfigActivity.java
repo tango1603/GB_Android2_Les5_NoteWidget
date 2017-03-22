@@ -31,9 +31,6 @@ public class WidgetConfigActivity extends AppCompatActivity {
         resaultIntent = new Intent();
         resaultIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID);
         setResult(RESULT_CANCELED, resaultIntent);
-
-        /*LinearLayout layout = (LinearLayout) findViewById(R.id.layout_widget);
-        layout.setBackgroundColor();*/
     }
 
     public void onClick(View view) {

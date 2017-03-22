@@ -3,6 +3,7 @@ package com.example.ilya.gb_android2_les5_notewidget.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,65 +12,42 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.ilya.gb_android2_les5_notewidget.Controller;
 import com.example.ilya.gb_android2_les5_notewidget.R;
-import com.example.ilya.gb_android2_les5_notewidget.models.tables.TblNotes;
-import com.example.ilya.gb_android2_les5_notewidget.models.tables.TblNotes_Table;
-import com.raizlabs.android.dbflow.sql.language.SQLite;
-import com.raizlabs.android.dbflow.sql.language.Select;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class NoteList extends AppCompatActivity {
 
     private static final String TAG = "DEBUGGG";
-    public static final String NOTE_NAME_ADD = "NoteNameAdd";
-    public static final String NOTE_TEXT_ADD = "NoteTextAdd";
-    public static final String NOTE_NAME_EDITED = "NoteNameEdited";
-    public static final String NOTE_TEXT_EDITED = "NoteTextEdited";
-    public static final String NOTE_POSITION = "NotePosition";
-    private static final int REQUEST_CODE_NOTE_ADD = 1;
-    private static final int REQUEST_CODE_NOTE_EDIT = 2;
+       public static final String NOTE_POSITION = "NotePosition";
+    public static final int REQUEST_CODE_NOTE_ADD = 1;
+    public static final int REQUEST_CODE_NOTE_EDIT = 2;
 
     private ListView lv_notes;
-    private ArrayAdapter<String> mStringArrayAdapter;
-    private List<String> elements = new ArrayList<>();
     private Intent mIntent;
-    private String noteName;
-    private String noteText;
     private int notePosition;
-    private List<TblNotes> tblNotesList;
-
-    /**
-     * Загружаем список из БД
-     */
-    private void loadActState() {
-        tblNotesList = new Select().from(TblNotes.class).queryList();
-        for (int i = 0; i < tblNotesList.size(); i++) {
-            if (!tblNotesList.get(i).noteName.equals("")) {
-                elements.add(i, tblNotesList.get(i).noteName);
-            } else {
-                break;
-            }
-        }
-    }
+    private ArrayAdapter<String> mStringArrayAdapter;
+    private Controller controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        controller= new Controller(this);
         lv_notes = (ListView) findViewById(R.id.list_notes);
-        loadActState();
         mStringArrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_activated_1, elements);
+                android.R.layout.simple_list_item_activated_1, controller.elements);
         lv_notes.setAdapter(mStringArrayAdapter);
         lv_notes.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+
+
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position,
                                                   long id, boolean checked) {
                 //обработчик выделения пунктов списка ActionMode
+                Log.d(TAG, "onItemCheckedStateChanged: " + position);
                 notePosition = position;
             }
+
 
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
@@ -77,12 +55,14 @@ public class NoteList extends AppCompatActivity {
                 switch (item.getItemId()) {
                     case R.id.menu_edit:
                         mIntent = new Intent(NoteList.this, Note.class);
-                        mIntent.putExtra("NodePosition", notePosition);
+                        mIntent.putExtra(NOTE_POSITION, notePosition);
                         startActivityForResult(mIntent, REQUEST_CODE_NOTE_EDIT);
+                        Log.d(TAG, "onActionItemClicked: " + REQUEST_CODE_NOTE_EDIT + "  :  " + notePosition);
                         mode.finish();
                         return true;
                     case R.id.menu_Delete:
-                        removeNote();
+                        controller.removeNote();
+                        mStringArrayAdapter.notifyDataSetChanged();
                         mode.finish();
                         return true;
                 }
@@ -123,12 +103,14 @@ public class NoteList extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_add: {
+                Log.d(TAG, "onOptionsItemSelected: " + REQUEST_CODE_NOTE_ADD);
                 mIntent = new Intent(NoteList.this, Note.class);
                 startActivityForResult(mIntent, REQUEST_CODE_NOTE_ADD);
                 return true;
             }
             case R.id.menu_clear: {
-                noteClear();
+                controller.noteClear();
+                mStringArrayAdapter.notifyDataSetChanged();
                 return true;
             }
             default:
@@ -139,84 +121,29 @@ public class NoteList extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
+       // controller.loadActState();
+        mStringArrayAdapter.notifyDataSetChanged();
+
+
+        /*if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_CODE_NOTE_ADD: {
-                    noteName = data.getStringExtra(NOTE_NAME_ADD);
-                    noteText = data.getStringExtra(NOTE_TEXT_ADD);
-                    if (!noteName.isEmpty()) {
-                        addElement(noteName, noteText);
-                    }
+                    Log.d(TAG, "onActivityResult: " + REQUEST_CODE_NOTE_ADD);
+                    *//*controller.noteName = data.getStringExtra(NOTE_NAME_ADD);
+                    controller.noteText = data.getStringExtra(NOTE_TEXT_ADD);
+                    if (!controller.noteName.isEmpty()) {
+                        controller.addElement(controller.noteName, controller.noteText);
+
+                    }*//*
                     break;
                 }
 
                 case REQUEST_CODE_NOTE_EDIT: {
-                    noteName = data.getStringExtra(NOTE_NAME_EDITED);
-                    noteText = data.getStringExtra(NOTE_TEXT_EDITED);
-                    notePosition = data.getIntExtra(NOTE_POSITION, -10);
-                    if (!noteName.isEmpty() && notePosition != -10) {
-                        editElement(notePosition, noteName, noteText);
-                    }
+                    Log.d(TAG, "onActivityResult: " + REQUEST_CODE_NOTE_EDIT);
+
                     break;
                 }
             }
-        }
-    }
-
-    /**
-     * Сохранение в БД, обновление списка
-     *
-     * @param noteName имя заметки
-     * @param noteText текст заметки
-     */
-    private void addElement(String noteName, String noteText) {
-        elements.add(noteName);
-        TblNotes tblNotes = new TblNotes();
-        tblNotes.setNoteName(noteName);
-        tblNotes.setNoteText(noteText);
-        tblNotes.setListPosition(elements.size() - 1);
-        tblNotes.save();
-        mStringArrayAdapter.notifyDataSetChanged();
-    }
-
-    /**
-     * Редактируем заметку
-     *
-     * @param notePosition позиция в списке
-     * @param noteName     имя заметки
-     * @param noteText     текст заметки
-     */
-    private void editElement(int notePosition, String noteName, String noteText) {
-        elements.set(notePosition, noteName);
-        SQLite.update(TblNotes.class)
-                .set(TblNotes_Table.noteName.eq(noteName), TblNotes_Table.noteText.eq(noteText))
-                .where(TblNotes_Table.listPosition.is(notePosition))
-                .async()
-                .execute();
-        mStringArrayAdapter.notifyDataSetChanged();
-    }
-
-    /**
-     * Удаляем все записи
-     */
-    private void noteClear() {
-        elements.clear();
-        SQLite.delete(TblNotes.class)
-                .async()
-                .execute();
-        mStringArrayAdapter.notifyDataSetChanged();
-    }
-
-
-    /**
-     * Удаляем выбранную запись
-     */
-    private void removeNote() {
-        elements.remove(notePosition);
-        SQLite.delete(TblNotes.class)
-                .where(TblNotes_Table.listPosition.is(notePosition))
-                .async()
-                .execute();
-        mStringArrayAdapter.notifyDataSetChanged();
+        }*/
     }
 }
