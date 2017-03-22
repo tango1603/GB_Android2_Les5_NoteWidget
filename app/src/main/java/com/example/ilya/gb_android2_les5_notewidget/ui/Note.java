@@ -48,9 +48,8 @@ public class Note extends AppCompatActivity {
         noteName.setCursorVisible(true);
         mIntent = getIntent();
         position = mIntent.getIntExtra(NoteList.NOTE_POSITION, -10);
-        Log.d(TAG, "onCreate: "+position);
         findEditNode(position);
-        controller= new Controller(this);
+        controller = new Controller(this);
     }
 
     @Override
@@ -74,22 +73,18 @@ public class Note extends AppCompatActivity {
             case R.id.menu_save: {
                 if (position == -10) {
                     if (noteName.getText().toString() != "") {
-                        Log.d(TAG, "onOptionsItemSelected position add: " + position);
                         controller.addElement(noteName.getText().toString(), noteText.getText().toString());
                         setResult(RESULT_OK, intent);
                     } else {
-                        Log.d(TAG, "RESULT_CANCELED" + position);
                         setResult(RESULT_CANCELED, intent);
                     }
                 } else {
                     if (noteName.getText().toString() != "") {
-                        Log.d(TAG, "onOptionsItemSelected position edited: " + position);
                         if (!noteName.getText().toString().isEmpty() && position != -10) {
-                            controller.editElement(position,noteName.getText().toString(),noteText.getText().toString());
-                        setResult(RESULT_OK, intent);}
-
+                            controller.editElement(position, noteName.getText().toString(), noteText.getText().toString());
+                            setResult(RESULT_OK, intent);
+                        }
                     } else {
-                        Log.d(TAG, "RESULT_CANCELED" + position);
                         setResult(RESULT_CANCELED, intent);
                     }
                 }
@@ -100,9 +95,5 @@ public class Note extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
-
-
-    }
+}
 

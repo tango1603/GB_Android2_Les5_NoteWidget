@@ -41,7 +41,6 @@ public class WidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-
         this.mContext = context;
         this.mAppWidgetIds = appWidgetIds.clone();
         this.mAppWidgetManager = appWidgetManager;
@@ -68,21 +67,16 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     public void updateWidget() {
-
         final int N = mAppWidgetIds.length;
-        Log.d(TAG, "updateWidget: "+N);
-
-
+        Log.d(TAG, "updateWidget: " + N);
         SimpleDateFormat format = new SimpleDateFormat("k:mm:ss", Locale.getDefault());
         String time = format.format(new Date());
         SharedPreferences options = mContext.getSharedPreferences(PREFERENCES, MODE_PRIVATE);
-
         for (int i = 0; i < N; ++i) {
             int color = options.getInt(String.valueOf(mAppWidgetIds[i]), -1);
             RemoteViews remoteViews = updateWidgetListView(mContext, mAppWidgetIds[i], color);
             remoteViews.setTextViewText(R.id.time_view, time);
             remoteViews.setTextColor(R.id.time_view, Color.BLACK);
-
             mAppWidgetManager.updateAppWidget(mAppWidgetIds[i], remoteViews);
             mAppWidgetManager.notifyAppWidgetViewDataChanged(mAppWidgetIds, R.id.listViewWidget);
         }
@@ -94,7 +88,6 @@ public class WidgetProvider extends AppWidgetProvider {
         setListClick(remoteViews, context);
         Intent svcIntent = new Intent(context, WidgetService.class);
         svcIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-
         svcIntent.setData(Uri.parse(svcIntent.toUri(Intent.URI_INTENT_SCHEME)));
         remoteViews.setRemoteAdapter(R.id.listViewWidget, svcIntent);
         remoteViews.setEmptyView(R.id.listViewWidget, R.id.empty_view);
@@ -104,7 +97,6 @@ public class WidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
-
         super.onDeleted(context, appWidgetIds);
         SharedPreferences options = context.getSharedPreferences(PREFERENCES, MODE_PRIVATE);
         SharedPreferences.Editor editor = options.edit();

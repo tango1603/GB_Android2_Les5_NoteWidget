@@ -18,10 +18,9 @@ import com.example.ilya.gb_android2_les5_notewidget.R;
 public class NoteList extends AppCompatActivity {
 
     private static final String TAG = "DEBUGGG";
-       public static final String NOTE_POSITION = "NotePosition";
+    public static final String NOTE_POSITION = "NotePosition";
     public static final int REQUEST_CODE_NOTE_ADD = 1;
     public static final int REQUEST_CODE_NOTE_EDIT = 2;
-
     private ListView lv_notes;
     private Intent mIntent;
     private int notePosition;
@@ -32,13 +31,12 @@ public class NoteList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        controller= new Controller(this);
+        controller = new Controller(this);
         lv_notes = (ListView) findViewById(R.id.list_notes);
-        mStringArrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_activated_1, controller.elements);
+        mStringArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1,
+                controller.elements);
         lv_notes.setAdapter(mStringArrayAdapter);
         lv_notes.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-
 
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position,
@@ -48,7 +46,6 @@ public class NoteList extends AppCompatActivity {
                 notePosition = position;
             }
 
-
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 // обработка нажатия на пункт ActionMode
@@ -57,7 +54,6 @@ public class NoteList extends AppCompatActivity {
                         mIntent = new Intent(NoteList.this, Note.class);
                         mIntent.putExtra(NOTE_POSITION, notePosition);
                         startActivityForResult(mIntent, REQUEST_CODE_NOTE_EDIT);
-                        Log.d(TAG, "onActionItemClicked: " + REQUEST_CODE_NOTE_EDIT + "  :  " + notePosition);
                         mode.finish();
                         return true;
                     case R.id.menu_Delete:
@@ -103,7 +99,6 @@ public class NoteList extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_add: {
-                Log.d(TAG, "onOptionsItemSelected: " + REQUEST_CODE_NOTE_ADD);
                 mIntent = new Intent(NoteList.this, Note.class);
                 startActivityForResult(mIntent, REQUEST_CODE_NOTE_ADD);
                 return true;
@@ -121,9 +116,8 @@ public class NoteList extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-       // controller.loadActState();
+        // controller.loadActState();
         mStringArrayAdapter.notifyDataSetChanged();
-
 
         /*if (resultCode == RESULT_OK) {
             switch (requestCode) {
@@ -140,7 +134,6 @@ public class NoteList extends AppCompatActivity {
 
                 case REQUEST_CODE_NOTE_EDIT: {
                     Log.d(TAG, "onActivityResult: " + REQUEST_CODE_NOTE_EDIT);
-
                     break;
                 }
             }

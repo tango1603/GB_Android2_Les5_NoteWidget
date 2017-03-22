@@ -93,7 +93,6 @@ public class Controller {
 
     public void updateWidget(String noteName, String noteText) {
         Log.d(TAG, "updateWidget: ");
-
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
         RemoteViews remoteViews = new RemoteViews(mContext.getPackageName(), R.layout.note_widget);
         ComponentName thisWidget = new ComponentName(mContext, WidgetProvider.class);
@@ -114,10 +113,4 @@ public class Controller {
                 .async()
                 .execute();
     }
-
-
-
-
-
-
 }

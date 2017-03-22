@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService.RemoteViewsFactory;
+
 import com.example.ilya.gb_android2_les5_notewidget.R;
 import com.example.ilya.gb_android2_les5_notewidget.models.tables.TblNotes;
 import com.raizlabs.android.dbflow.sql.language.Select;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,12 +17,10 @@ import java.util.List;
 public class WidgetFactory implements RemoteViewsFactory {
     private ArrayList<ListItem> listItemList = new ArrayList<>();
     private Context context = null;
-    private int appWidgetId;
-    private List<TblNotes> tblNotesList;
 
     public WidgetFactory(Context context, Intent intent) {
         this.context = context;
-        appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+        int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
         loadListItemFromDataBase();
     }
@@ -29,7 +29,7 @@ public class WidgetFactory implements RemoteViewsFactory {
      * Загружаем список из БД
      */
     private void loadListItemFromDataBase() {
-        tblNotesList = new Select().from(TblNotes.class).queryList();
+        List<TblNotes> tblNotesList = new Select().from(TblNotes.class).queryList();
         for (int i = 0; i < tblNotesList.size(); i++) {
             if (!tblNotesList.get(i).noteName.equals("")) {
                 ListItem listItem = new ListItem();
@@ -59,11 +59,9 @@ public class WidgetFactory implements RemoteViewsFactory {
         remoteView.setTextViewText(R.id.heading, listItem.heading);
         remoteView.setTextViewText(R.id.content, listItem.content);
         //// TODO: 15.03.2017 сделать рендомный подмес картинок
-
         Intent clickIntent = new Intent();
-        clickIntent.putExtra(WidgetProvider.ITEM_POSITION,position);
-        remoteView.setOnClickFillInIntent(R.id.itemWidget,clickIntent);
-
+        clickIntent.putExtra(WidgetProvider.ITEM_POSITION, position);
+        remoteView.setOnClickFillInIntent(R.id.itemWidget, clickIntent);
         return remoteView;
     }
 
@@ -93,7 +91,4 @@ public class WidgetFactory implements RemoteViewsFactory {
     @Override
     public void onDestroy() {
     }
-
-
-
 }
