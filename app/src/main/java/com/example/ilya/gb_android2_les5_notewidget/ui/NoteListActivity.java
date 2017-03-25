@@ -1,5 +1,7 @@
 package com.example.ilya.gb_android2_les5_notewidget.ui;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,13 +16,12 @@ import android.widget.ListView;
 
 import com.example.ilya.gb_android2_les5_notewidget.Controller;
 import com.example.ilya.gb_android2_les5_notewidget.R;
+import com.example.ilya.gb_android2_les5_notewidget.widget.WidgetProvider;
 
-public class NoteList extends AppCompatActivity {
+public class NoteListActivity extends AppCompatActivity {
 
     private static final String TAG = "DEBUGGG";
     public static final String NOTE_POSITION = "NotePosition";
-    public static final int REQUEST_CODE_NOTE_ADD = 1;
-    public static final int REQUEST_CODE_NOTE_EDIT = 2;
     private ListView lv_notes;
     private Intent mIntent;
     private int notePosition;
@@ -51,15 +52,16 @@ public class NoteList extends AppCompatActivity {
                 // обработка нажатия на пункт ActionMode
                 switch (item.getItemId()) {
                     case R.id.menu_edit:
-                        mIntent = new Intent(NoteList.this, Note.class);
+                        mIntent = new Intent(NoteListActivity.this, NoteActivity.class);
                         mIntent.putExtra(NOTE_POSITION, notePosition);
-                        startActivityForResult(mIntent, REQUEST_CODE_NOTE_EDIT);
+                        startActivity(mIntent);
                         mode.finish();
                         return true;
                     case R.id.menu_Delete:
                         controller.removeNote();
                         mStringArrayAdapter.notifyDataSetChanged();
                         mode.finish();
+                        sendWidgetIntent();
                         return true;
                 }
                 mode.finish();
@@ -90,6 +92,13 @@ public class NoteList extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        controller.loadActState();
+        mStringArrayAdapter.notifyDataSetChanged();
+        super.onResume();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
@@ -99,13 +108,14 @@ public class NoteList extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_add: {
-                mIntent = new Intent(NoteList.this, Note.class);
-                startActivityForResult(mIntent, REQUEST_CODE_NOTE_ADD);
+                mIntent = new Intent(NoteListActivity.this, NoteActivity.class);
+                startActivity(mIntent);
                 return true;
             }
             case R.id.menu_clear: {
                 controller.noteClear();
                 mStringArrayAdapter.notifyDataSetChanged();
+                sendWidgetIntent();
                 return true;
             }
             default:
@@ -113,30 +123,13 @@ public class NoteList extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // controller.loadActState();
-        mStringArrayAdapter.notifyDataSetChanged();
-
-        /*if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_CODE_NOTE_ADD: {
-                    Log.d(TAG, "onActivityResult: " + REQUEST_CODE_NOTE_ADD);
-                    *//*controller.noteName = data.getStringExtra(NOTE_NAME_ADD);
-                    controller.noteText = data.getStringExtra(NOTE_TEXT_ADD);
-                    if (!controller.noteName.isEmpty()) {
-                        controller.addElement(controller.noteName, controller.noteText);
-
-                    }*//*
-                    break;
-                }
-
-                case REQUEST_CODE_NOTE_EDIT: {
-                    Log.d(TAG, "onActivityResult: " + REQUEST_CODE_NOTE_EDIT);
-                    break;
-                }
-            }
-        }*/
+    public void sendWidgetIntent() {
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+        ComponentName widgetComponent = new ComponentName(this, WidgetProvider.class);
+        int[] widgetIds = widgetManager.getAppWidgetIds(widgetComponent);
+        Intent update = new Intent();
+        update.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+        update.setAction(WidgetProvider.ACTION_WIDGET_UPDATE);
+        this.sendBroadcast(update);
     }
 }

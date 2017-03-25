@@ -3,23 +3,18 @@ package com.example.ilya.gb_android2_les5_notewidget.widget;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.example.ilya.gb_android2_les5_notewidget.R;
-import com.example.ilya.gb_android2_les5_notewidget.ui.Note;
-import com.example.ilya.gb_android2_les5_notewidget.ui.NoteList;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Timer;
+import com.example.ilya.gb_android2_les5_notewidget.ui.NoteActivity;
+import com.example.ilya.gb_android2_les5_notewidget.ui.NoteListActivity;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.ilya.gb_android2_les5_notewidget.widget.WidgetConfigActivity.PREFERENCES;
@@ -28,70 +23,44 @@ import static com.example.ilya.gb_android2_les5_notewidget.widget.WidgetConfigAc
  * Created by Ilya on 15.03.2017.
  */
 
+
 public class WidgetProvider extends AppWidgetProvider {
-    public static final String TAG = WidgetProvider.class.getSimpleName();
+    public static final String TAG = "DEBUGGG";
     final String ACTION_ON_CLICK = "com.example.ilya.gb_android2_les5_notewidget.itemonclick";
     final static String ITEM_POSITION = "item_position";
-    private Timer mTimer;
-    private Context mContext;
-    private int[] mAppWidgetIds;
-    private AppWidgetManager mAppWidgetManager;
-    int mAppWidgetId;
+    public static final String ACTION_WIDGET_UPDATE = "com.example.ilya.gb_android2_les5_notewidget.widget.ACTION_UPDATE";
 
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        this.mContext = context;
-        this.mAppWidgetIds = appWidgetIds.clone();
-        this.mAppWidgetManager = appWidgetManager;
-        updateWidget();
 
-
-        /*if (mTimer == null) {
-            mTimer = new Timer();
-            this.mContext = context;
-            this.mAppWidgetIds = appWidgetIds.clone();
-            this.mAppWidgetManager = appWidgetManager;
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, 1);
-            calendar.set(Calendar.MILLISECOND, 0);
-            mTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    updateWidget();
-                }
-            }, calendar.getTime(), 1000);
-        }*/
+        for (int i : appWidgetIds) {
+            updateWidget(context, appWidgetManager, i);
+        }
         Log.d(TAG, "onUpdate: ");
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
-    public void updateWidget() {
-        final int N = mAppWidgetIds.length;
-        Log.d(TAG, "updateWidget: " + N);
-        SimpleDateFormat format = new SimpleDateFormat("k:mm:ss", Locale.getDefault());
-        String time = format.format(new Date());
-        SharedPreferences options = mContext.getSharedPreferences(PREFERENCES, MODE_PRIVATE);
-        for (int i = 0; i < N; ++i) {
-            int color = options.getInt(String.valueOf(mAppWidgetIds[i]), -1);
-            RemoteViews remoteViews = updateWidgetListView(mContext, mAppWidgetIds[i], color);
-            remoteViews.setTextViewText(R.id.time_view, time);
-            remoteViews.setTextColor(R.id.time_view, Color.BLACK);
-            mAppWidgetManager.updateAppWidget(mAppWidgetIds[i], remoteViews);
-            mAppWidgetManager.notifyAppWidgetViewDataChanged(mAppWidgetIds, R.id.listViewWidget);
-        }
+    public void updateWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        Log.d(TAG, "updateWidget: ");
+        SharedPreferences options = context.getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        int color = options.getInt(String.valueOf(appWidgetId), -1);
+        RemoteViews rv = updateWidgetListView(context, appWidgetId, color);
+        setListClick(rv, context, appWidgetId);
+        appWidgetManager.updateAppWidget(appWidgetId, rv);
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.listViewWidget);
     }
 
     private RemoteViews updateWidgetListView(Context context, int appWidgetId, int color) {
+        Log.d(TAG, "updateWidgetListView: ");
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.note_widget);
         remoteViews.setInt(R.id.layout_widget, "setBackgroundColor", color);
-        setListClick(remoteViews, context);
+        setListClick(remoteViews, context, appWidgetId);
         Intent svcIntent = new Intent(context, WidgetService.class);
         svcIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         svcIntent.setData(Uri.parse(svcIntent.toUri(Intent.URI_INTENT_SCHEME)));
         remoteViews.setRemoteAdapter(R.id.listViewWidget, svcIntent);
         remoteViews.setEmptyView(R.id.listViewWidget, R.id.empty_view);
-        mAppWidgetId = appWidgetId;
         return remoteViews;
     }
 
@@ -106,8 +75,13 @@ public class WidgetProvider extends AppWidgetProvider {
         editor.apply();
     }
 
-
-    void setListClick(RemoteViews rv, Context context) {
+    /**
+     * Устанавливаем клик
+     *
+     * @param rv
+     * @param context
+     */
+    void setListClick(RemoteViews rv, Context context, int appWidgetId) {
         Intent listClickIntent = new Intent(context, WidgetProvider.class);
         listClickIntent.setAction(ACTION_ON_CLICK);
         PendingIntent listClickPIntent = PendingIntent.getBroadcast(context, 0, listClickIntent, 0);
@@ -116,17 +90,30 @@ public class WidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        super.onReceive(context, intent);
+        Log.d(TAG, "onReceive: " + intent.getAction());
+        //AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        if (intent.getAction().equalsIgnoreCase(ACTION_WIDGET_UPDATE)) {
+            Log.d(TAG, "onReceive: интент прилетел!!!");
+            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
+            for (int appWidgetID : ids) {
+                updateWidget(context, appWidgetManager, appWidgetID);
+            }
+            appWidgetManager.notifyAppWidgetViewDataChanged(ids, R.id.listViewWidget);
+        }
+
         if (intent.getAction().equalsIgnoreCase(ACTION_ON_CLICK)) {
             int itemPos = intent.getIntExtra(ITEM_POSITION, -1);
             if (itemPos != -1) {
                 Toast.makeText(context, "Click on item " + itemPos, Toast.LENGTH_SHORT).show();
-                Intent editIntent = new Intent(context, Note.class);
-                editIntent.putExtra(NoteList.NOTE_POSITION, itemPos);
+                Intent editIntent = new Intent(context, NoteActivity.class);
+                editIntent.putExtra(NoteListActivity.NOTE_POSITION, itemPos);
                 editIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(editIntent);
                 Log.d(TAG, "onReceive: " + itemPos);
             }
         }
+        super.onReceive(context, intent);
     }
 }

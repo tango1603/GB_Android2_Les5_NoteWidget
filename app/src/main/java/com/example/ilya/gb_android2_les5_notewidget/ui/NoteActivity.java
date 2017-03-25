@@ -1,9 +1,10 @@
 package com.example.ilya.gb_android2_les5_notewidget.ui;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -12,9 +13,10 @@ import com.example.ilya.gb_android2_les5_notewidget.Controller;
 import com.example.ilya.gb_android2_les5_notewidget.R;
 import com.example.ilya.gb_android2_les5_notewidget.models.tables.TblNotes;
 import com.example.ilya.gb_android2_les5_notewidget.models.tables.TblNotes_Table;
+import com.example.ilya.gb_android2_les5_notewidget.widget.WidgetProvider;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
-public class Note extends AppCompatActivity {
+public class NoteActivity extends AppCompatActivity {
 
     private static final String TAG = "DEBUGGG";
     private EditText noteName;
@@ -22,7 +24,7 @@ public class Note extends AppCompatActivity {
     private Intent mIntent;
     private String nodeNameStr;
     private String nodeTextStr;
-    private int position = -10;
+    private int position = -10; //-10 значит добавление
     private Controller controller;
 
 
@@ -47,7 +49,7 @@ public class Note extends AppCompatActivity {
         noteName.setFocusable(true);
         noteName.setCursorVisible(true);
         mIntent = getIntent();
-        position = mIntent.getIntExtra(NoteList.NOTE_POSITION, -10);
+        position = mIntent.getIntExtra(NoteListActivity.NOTE_POSITION, -10);
         findEditNode(position);
         controller = new Controller(this);
     }
@@ -67,25 +69,15 @@ public class Note extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        Intent intent = new Intent();
         switch (item.getItemId()) {
             case R.id.menu_save: {
-                if (position == -10) {
-                    if (noteName.getText().toString() != "") {
+                if (noteName.getText().toString() != "") {
+                    if (position == -10) {
                         controller.addElement(noteName.getText().toString(), noteText.getText().toString());
-                        setResult(RESULT_OK, intent);
+                        sendWidgetIntent();
                     } else {
-                        setResult(RESULT_CANCELED, intent);
-                    }
-                } else {
-                    if (noteName.getText().toString() != "") {
-                        if (!noteName.getText().toString().isEmpty() && position != -10) {
-                            controller.editElement(position, noteName.getText().toString(), noteText.getText().toString());
-                            setResult(RESULT_OK, intent);
-                        }
-                    } else {
-                        setResult(RESULT_CANCELED, intent);
+                        controller.editElement(position, noteName.getText().toString(), noteText.getText().toString());
+                        sendWidgetIntent();
                     }
                 }
                 finish();
@@ -95,5 +87,14 @@ public class Note extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-}
 
+    public void sendWidgetIntent() {
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+        ComponentName widgetComponent = new ComponentName(this, WidgetProvider.class);
+        int[] widgetIds = widgetManager.getAppWidgetIds(widgetComponent);
+        Intent update = new Intent();
+        update.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+        update.setAction(WidgetProvider.ACTION_WIDGET_UPDATE);
+        this.sendBroadcast(update);
+    }
+}

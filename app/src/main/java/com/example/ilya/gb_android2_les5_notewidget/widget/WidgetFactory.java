@@ -22,13 +22,14 @@ public class WidgetFactory implements RemoteViewsFactory {
         this.context = context;
         int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
-        loadListItemFromDataBase();
+
     }
 
     /**
      * Загружаем список из БД
      */
-    private void loadListItemFromDataBase() {
+    public void loadListItemFromDataBase() {
+        listItemList.clear();
         List<TblNotes> tblNotesList = new Select().from(TblNotes.class).queryList();
         for (int i = 0; i < tblNotesList.size(); i++) {
             if (!tblNotesList.get(i).noteName.equals("")) {
@@ -86,6 +87,7 @@ public class WidgetFactory implements RemoteViewsFactory {
 
     @Override
     public void onDataSetChanged() {
+        loadListItemFromDataBase();
     }
 
     @Override

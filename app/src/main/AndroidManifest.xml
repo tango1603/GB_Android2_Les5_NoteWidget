@@ -16,7 +16,7 @@
             android:exported="true"/>
 
         <activity
-            android:name=".ui.NoteList"
+            android:name=".ui.NoteListActivity"
             android:label="Список заметок">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -25,14 +25,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.Note"
+            android:name=".ui.NoteActivity"
             android:label="Создание заметки"
-            android:parentActivityName=".ui.NoteList">
+            android:parentActivityName=".ui.NoteListActivity">
         </activity>
 
         <receiver android:name=".widget.WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.example.ilya.gb_android2_les5_notewidget.widget.ACTION_UPDATE"/>
+
             </intent-filter>
 
             <meta-data
@@ -44,7 +46,8 @@
             android:name=".widget.WidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
-        <activity android:name=".widget.WidgetConfigActivity"
+        <activity
+            android:name=".widget.WidgetConfigActivity"
             android:theme="@style/Base.Theme.AppCompat.Light.Dialog">
             <intent-filter>
                 <action android:name="android.intent.action.APPWIDGET_CONFIGURE"></action>
